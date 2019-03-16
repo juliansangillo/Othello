@@ -53,7 +53,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Test.cs" />
+     <Compile Include="Assets\Scripts\BoardState.cs" />
+     <Compile Include="Assets\Scripts\Clickable.cs" />
+     <Compile Include="Assets\Scripts\FlowController.cs" />
+     <Compile Include="Assets\Scripts\Reference.cs" />
  <Reference Include="Unity.TextMeshPro.Editor">
  <HintPath>C:/Users/juls8/OneDrive/Documents/GitHub/Othello/Othello/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
  </Reference>
