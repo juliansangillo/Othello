@@ -2,13 +2,13 @@
 
 public class Reference : MonoBehaviour {
     
-    public static Material clickableMaterial;
+    public static Material hoverMaterial;
 
-    public Material ClickableMaterial;
+    public Material HoverMaterial;
 
     void Awake() {
 
-        clickableMaterial = ClickableMaterial;
+        hoverMaterial = HoverMaterial;
 
     }
 
