@@ -46,6 +46,8 @@ public class FlipColor : MonoBehaviour
         exit.colors = exitBlock;
         exitTxt.color = white;
 
+        Settings.blackSetting = true;
+
     }
 
     public void flipToWhite() {
@@ -63,6 +65,8 @@ public class FlipColor : MonoBehaviour
         exitBlock.normalColor = white;
         exit.colors = exitBlock;
         exitTxt.color = black;
+
+        Settings.blackSetting = false;
 
     }
 

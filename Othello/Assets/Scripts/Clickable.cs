@@ -4,7 +4,7 @@ using UnityEngine;
 public class Clickable : MonoBehaviour {
 
     private Renderer rend;
-    private Material blueMat;
+    private Material mat;
     private Material redMat;
     private Color albedo;
     private bool isPlus = false;
@@ -12,24 +12,23 @@ public class Clickable : MonoBehaviour {
     void Awake() {
         
         rend = gameObject.GetComponent<Renderer>();
-        blueMat = (Material)rend.materials.GetValue(1);
-        redMat = Reference.hoverMaterial;
-        albedo = blueMat.GetColor("_Color");
+        mat = (Material)rend.materials.GetValue(1);
+        albedo = mat.GetColor("_Color");
 
     }
 
     void Update() {
 
-        if(albedo.a <= 0 || albedo.a >= 1)
+        if(albedo.a <= 0 || albedo.a >= 1f)
             isPlus = !isPlus;
 
         if(isPlus)
-            albedo.a += 0.02f;
+            albedo.a += 0.015f;
         else
-            albedo.a -= 0.02f;
+            albedo.a -= 0.015f;
 
-        blueMat.SetColor("_Color", albedo);
-        rend.materials.SetValue(blueMat, 1);
+        mat.SetColor("_Color", albedo);
+        rend.materials.SetValue(mat, 1);
 
     }
 
@@ -41,15 +40,21 @@ public class Clickable : MonoBehaviour {
 
     void OnMouseEnter() {
         
-        if(gameObject.GetComponent<Clickable>().enabled)
-            rend.materials.SetValue(redMat, 1);
+        if(gameObject.GetComponent<Clickable>().enabled) {
+            albedo.r = 1;
+            albedo.g = 0;
+            albedo.b = 0;
+        }
 
     }
 
     void OnMouseExit() {
 
-        if(gameObject.GetComponent<Clickable>().enabled)
-            rend.materials.SetValue(blueMat, 1);
+        if(gameObject.GetComponent<Clickable>().enabled) {
+            albedo.r = 0;
+            albedo.g = 0;
+            albedo.b = 1;
+        }
 
     }
 
@@ -73,8 +78,8 @@ public class Clickable : MonoBehaviour {
 
         isPlus = false;
         albedo.a = 0;
-        blueMat.SetColor("_Color", albedo);
-        rend.materials.SetValue(blueMat, 1);
+        mat.SetColor("_Color", albedo);
+        rend.materials.SetValue(mat, 1);
 
     }
 

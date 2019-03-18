@@ -1,5 +1,5 @@
-﻿using System.Collections;
-using TMPro;
+﻿using TMPro;
+using System.Collections;
 using UnityEngine;
 
 public class FlowController : MonoBehaviour {
@@ -33,6 +33,9 @@ public class FlowController : MonoBehaviour {
     }
 
     void enableOptions() {
+
+        blackScoreText.SetText(board.GetComponent<BoardState>().blackScore.ToString());
+        whiteScoreText.SetText(board.GetComponent<BoardState>().whiteScore.ToString());
 
         ArrayList moves = board.GetComponent<BoardState>().move;
         foreach(Vector2 move in moves) {
@@ -81,11 +84,6 @@ public class FlowController : MonoBehaviour {
         }
 
         board.GetComponent<BoardState>().update(selected);
-        
-        blackScoreText.SetText(board.GetComponent<BoardState>().blackScore.ToString());
-        whiteScoreText.SetText(board.GetComponent<BoardState>().whiteScore.ToString());
-
-        enableOptions();
 
     }
 

@@ -48,14 +48,6 @@ public class BoardState : MonoBehaviour {
         }
 
     }
-    private bool _isBlack;
-    public bool isBlack {
-
-        get {
-            return _isBlack;
-        }
-
-    }
     private ArrayList _move;
     public ArrayList move {
 
@@ -64,6 +56,16 @@ public class BoardState : MonoBehaviour {
         }
 
     }
+    private bool _isBlack;
+    public bool isBlack {
+
+        get {
+            return _isBlack;
+        }
+
+    }
+    private Transform indicator;
+    private int coroutinesRunning = 0;
 
     void Start() {
 
@@ -82,13 +84,14 @@ public class BoardState : MonoBehaviour {
         _whiteList.Add(new Vector2(4, 3));
         _whiteList.Add(new Vector2(3, 4));
 
-        _isBlack = true;
-
         _move = new ArrayList();
         _move.Add(new Vector2(5, 3));
         _move.Add(new Vector2(4, 2));
         _move.Add(new Vector2(3, 5));
         _move.Add(new Vector2(2, 4));
+
+        _isBlack = true;
+        indicator = GameObject.Find("TurnIndicator").transform.GetChild(0);
 
     }
 
@@ -104,9 +107,7 @@ public class BoardState : MonoBehaviour {
         }
 
         recalculatePieces(selected);
-        _isBlack = !_isBlack;
-        
-        recalculateMoves();
+        StartCoroutine(waitForCors());
 
     }
 
@@ -126,13 +127,7 @@ public class BoardState : MonoBehaviour {
                     } while(_whiteList.Contains(pos));
 
                     if(_blackList.Contains(pos))
-                        foreach(Vector2 piece in white) {
-                            Animator anim = pieces[(int)piece.y , (int)piece.x].transform.GetChild(0).GetComponent<Animator>();
-                            anim.Play("Black");
-                            _blackList.Add(piece);
-                            _whiteList.Remove(piece);
-                            new WaitForSeconds(0.1f);
-                        }
+                        StartCoroutine(flip(white, "Black"));
                 }
             break;
         case false:
@@ -148,19 +143,35 @@ public class BoardState : MonoBehaviour {
                     } while(_blackList.Contains(pos));
 
                     if(_whiteList.Contains(pos))
-                        foreach(Vector2 piece in black) {
-                            Animator anim = pieces[(int)piece.y , (int)piece.x].transform.GetChild(0).GetComponent<Animator>();
-                            anim.Play("White");
-                            _whiteList.Add(piece);
-                            _blackList.Remove(piece);
-                            new WaitForSeconds(0.1f);
-                        }
+                        StartCoroutine(flip(black, "White"));
                 }
             break;
         }
 
-        _blackScore = blackList.Count;
-        _whiteScore = whiteList.Count;
+    }
+
+    IEnumerator flip(ArrayList p, string state) {
+
+        coroutinesRunning++;
+
+        foreach(Vector2 piece in p) {
+            Animator anim = pieces[(int)piece.y , (int)piece.x].transform.GetChild(0).GetComponent<Animator>();
+            anim.Play(state);
+
+            if(state == "Black") {
+                _blackList.Add(piece);
+                _whiteList.Remove(piece);
+            }
+            else {
+                _whiteList.Add(piece);
+                _blackList.Remove(piece);
+            }
+            _blackScore = blackList.Count;
+            _whiteScore = whiteList.Count;
+            yield return new WaitForSeconds(0.2f);
+        }
+
+        coroutinesRunning--;
 
     }
 
@@ -194,6 +205,7 @@ public class BoardState : MonoBehaviour {
                 if(move.Count == 0) {
                     blackHasMoves = false;
                     _isBlack = false;
+                    indicator.GetComponent<Animator>().Play("White");
                     continue;
                 }
                 break;
@@ -217,6 +229,7 @@ public class BoardState : MonoBehaviour {
                 if(move.Count == 0) {
                     whiteHasMoves = false;
                     _isBlack = true;
+                    indicator.GetComponent<Animator>().Play("Black");
                     continue;
                 }
                 break;
@@ -230,6 +243,23 @@ public class BoardState : MonoBehaviour {
             SendMessageUpwards("outOfMoves", 1);
         else if(!whiteHasMoves)
             SendMessageUpwards("outOfMoves", 2);
+
+    }
+
+    IEnumerator waitForCors() {
+
+        while(coroutinesRunning > 0) {
+            yield return null;
+        }
+
+        _isBlack = !_isBlack;
+        if(_isBlack)
+            indicator.GetComponent<Animator>().Play("Black");
+        else
+            indicator.GetComponent<Animator>().Play("White");
+
+        recalculateMoves();
+        SendMessageUpwards("enableOptions");
 
     }
 
