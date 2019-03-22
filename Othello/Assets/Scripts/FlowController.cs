@@ -1,5 +1,4 @@
-﻿using TMPro;
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 
 public class FlowController : MonoBehaviour {
@@ -9,8 +8,6 @@ public class FlowController : MonoBehaviour {
     public GameObject whiteFab;
     public Vector3 blackSpawn;
     public Vector3 whiteSpawn;
-    public TextMeshProUGUI blackScoreText;
-    public TextMeshProUGUI whiteScoreText;
     public GameObject blackAlert;
     public GameObject whiteAlert;
     public GameObject blackWin;
@@ -29,18 +26,21 @@ public class FlowController : MonoBehaviour {
             for(int j = 0; j < 8; j++)
                 space[i , j] = row.GetChild(j).gameObject;
         }
+
+        enableOptions();
         
     }
 
     void enableOptions() {
 
-        blackScoreText.SetText(board.GetComponent<BoardState>().blackScore.ToString());
-        whiteScoreText.SetText(board.GetComponent<BoardState>().whiteScore.ToString());
-
-        ArrayList moves = board.GetComponent<BoardState>().move;
-        foreach(Vector2 move in moves) {
-            space[(int)move.y, (int)move.x].GetComponent<Clickable>().enabled = true;
+        if(Settings.playerIsBlack == board.GetComponent<BoardState>().isBlack){
+            ArrayList moves = board.GetComponent<BoardState>().move;
+            foreach(Vector2 move in moves) {
+                space[(int)move.y, (int)move.x].GetComponent<Clickable>().enabled = true;
+            }
         }
+        else
+            BroadcastMessage("aiMoves");
 
     }
 

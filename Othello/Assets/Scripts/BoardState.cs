@@ -1,8 +1,12 @@
-﻿using System.Collections;
+﻿using TMPro;
+using System.Collections;
 using UnityEngine;
 
 public class BoardState : MonoBehaviour {
 
+    public TextMeshProUGUI blackScoreText;
+    public TextMeshProUGUI whiteScoreText;
+    
     private GameObject[ , ] _pieces;
     public GameObject[ , ] pieces {
 
@@ -67,7 +71,7 @@ public class BoardState : MonoBehaviour {
     private Transform indicator;
     private int coroutinesRunning = 0;
 
-    void Start() {
+    void Awake() {
 
         _pieces = new GameObject[8 , 8];
 
@@ -168,6 +172,8 @@ public class BoardState : MonoBehaviour {
             }
             _blackScore = blackList.Count;
             _whiteScore = whiteList.Count;
+            blackScoreText.SetText(blackScore.ToString());
+            whiteScoreText.SetText(whiteScore.ToString());
             yield return new WaitForSeconds(0.2f);
         }
 

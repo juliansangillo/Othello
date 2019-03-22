@@ -5,6 +5,6 @@ using UnityEngine;
 public class Settings : MonoBehaviour
 {
     
-    public static bool blackSetting = true;
+    public static bool playerIsBlack = true;
 
 }

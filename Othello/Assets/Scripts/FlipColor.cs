@@ -46,7 +46,7 @@ public class FlipColor : MonoBehaviour
         exit.colors = exitBlock;
         exitTxt.color = white;
 
-        Settings.blackSetting = true;
+        Settings.playerIsBlack = true;
 
     }
 
@@ -66,7 +66,7 @@ public class FlipColor : MonoBehaviour
         exit.colors = exitBlock;
         exitTxt.color = black;
 
-        Settings.blackSetting = false;
+        Settings.playerIsBlack = false;
 
     }
 

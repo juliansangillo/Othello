@@ -422,7 +422,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 122173547}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b7f9c4fbb1c3655419225519dcba5e8e, type: 3}
   m_Name: 
@@ -527,7 +527,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 129686841}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b7f9c4fbb1c3655419225519dcba5e8e, type: 3}
   m_Name: 
@@ -883,7 +883,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 212814233}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b7f9c4fbb1c3655419225519dcba5e8e, type: 3}
   m_Name: 
@@ -2048,6 +2048,7 @@ GameObject:
   - component: {fileID: 490077000}
   - component: {fileID: 490077002}
   - component: {fileID: 490076999}
+  - component: {fileID: 490077001}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -2073,8 +2074,6 @@ MonoBehaviour:
   whiteFab: {fileID: 37294241723939848, guid: 7cda440c14588cc4291e6d746c973529, type: 3}
   blackSpawn: {x: -8, y: 0.5, z: 0}
   whiteSpawn: {x: 8, y: 0.5, z: 0}
-  blackScoreText: {fileID: 298270194}
-  whiteScoreText: {fileID: 1601731986}
   blackAlert: {fileID: 1134099184}
   whiteAlert: {fileID: 547107983}
   blackWin: {fileID: 1241306387}
@@ -2095,6 +2094,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &490077001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 490076998}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62c81f2dc1609ad4e9673c1a9560a35f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &490077002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7268,6 +7279,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aae9038d40d95f846b09eebcf7cfdef3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  blackScoreText: {fileID: 298270194}
+  whiteScoreText: {fileID: 1601731986}
 --- !u!1 &1387166673
 GameObject:
   m_ObjectHideFlags: 0
@@ -8707,7 +8720,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1664960213}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b7f9c4fbb1c3655419225519dcba5e8e, type: 3}
   m_Name: 

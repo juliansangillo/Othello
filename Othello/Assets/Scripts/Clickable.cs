@@ -69,6 +69,7 @@ public class Clickable : MonoBehaviour {
             selected.x = (int)Char.GetNumericValue(j);
             selected.y = (int)Char.GetNumericValue(i);
 
+            SendMessageUpwards("playerMoves", selected);
             SendMessageUpwards("addToBoard", selected);
         }
 
