@@ -69,7 +69,7 @@ public class FlowController : MonoBehaviour {
 
     }
 
-    void addToBoard(Vector2 selected) {
+    void addToBoard(Space selected) {
 
         BroadcastMessage("disable");
 
@@ -77,7 +77,7 @@ public class FlowController : MonoBehaviour {
         Vector3 target;
         bool isBlack;
 
-        target = space[(int)selected.y, (int)selected.x].GetComponent<Transform>().position;
+        target = space[selected.y , selected.x].GetComponent<Transform>().position;
         target.y = 0.5f;
 
         isBlack = gameState.isBlackTurn();
@@ -90,15 +90,14 @@ public class FlowController : MonoBehaviour {
             piece = Instantiate(whiteFab, whiteSpawn, new Quaternion());
             break;
         }
-
-        pieces[(int)selected.x, (int)selected.y] = piece;
+        pieces[selected.x , selected.y] = piece;
 
         Transform piecePos = piece.GetComponent<Transform>();
         StartCoroutine(moveToTarget(piecePos, selected, target));
 
     }
 
-    IEnumerator moveToTarget(Transform piece, Vector2 selected, Vector3 target) {
+    IEnumerator moveToTarget(Transform piece, Space selected, Vector3 target) {
 
         float delay = 0.01f;
         float speed = 0.5f;
@@ -114,12 +113,12 @@ public class FlowController : MonoBehaviour {
 
     }
 
-    void setState(Vector2 selected) {
+    void setState(Space selected) {
 
         ArrayList piecesToFlip = new ArrayList();
         int blackCount = gameState.getBlackList().Count;
         int whiteCount = gameState.getWhiteList().Count;
-        gameState = gameState.calculateNextState((int)selected.x, (int)selected.y, piecesToFlip);
+        gameState = gameState.calculateNextState(selected.x, selected.y, piecesToFlip);
         switch(!gameState.isBlackTurn()) {
         case true:
             blackCount++;
