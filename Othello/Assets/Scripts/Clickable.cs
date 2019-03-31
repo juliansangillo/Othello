@@ -5,7 +5,6 @@ public class Clickable : MonoBehaviour {
 
     private Renderer rend;
     private Material mat;
-    private Material redMat;
     private Color albedo;
     private bool isPlus = false;
 
@@ -69,7 +68,7 @@ public class Clickable : MonoBehaviour {
             selected.x = (int)Char.GetNumericValue(j);
             selected.y = (int)Char.GetNumericValue(i);
 
-            SendMessageUpwards("playerMoves", selected);
+            //SendMessageUpwards("playerMoves", selected);
             SendMessageUpwards("addToBoard", selected);
         }
 
