@@ -60,7 +60,7 @@ public class Clickable : MonoBehaviour {
     void OnMouseDown() {
         
         if(gameObject.GetComponent<Clickable>().enabled) {
-            Vector2 selected;
+            Space selected;
             
             char i = name[name.Length - 2];
             char j = name[name.Length - 1];
@@ -68,7 +68,7 @@ public class Clickable : MonoBehaviour {
             selected.x = (int)Char.GetNumericValue(j);
             selected.y = (int)Char.GetNumericValue(i);
 
-            //SendMessageUpwards("playerMoves", selected);
+            SendMessageUpwards("playerMoves", selected);
             SendMessageUpwards("addToBoard", selected);
         }
 
