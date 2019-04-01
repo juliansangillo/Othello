@@ -29,8 +29,8 @@ public class ArtificialIntelligence : MonoBehaviour {
 
     void aiMoves() {
 
-        Node thisNode = new Node(current.isBlackTurn(), current.getBlackList(), current.getWhiteList());
-        tree = new Tree(thisNode, 3);
+        Node root = new Node(current);
+        tree = new Tree(root, 3);
         
         Space choice = tree.miniMaxSearch();
 
@@ -42,20 +42,54 @@ public class ArtificialIntelligence : MonoBehaviour {
 
 class Node {
 
-    public Space move;
-    public State state;
-    public ArrayList link;
+    private Space move;
+    private State state;
+    private ArrayList child;
 
-    public Node(bool isBlack, ArrayList blackList, ArrayList whiteList) {
+    private int heuristic = 0;
 
-        link = new ArrayList();
-        state = new State(isBlack, blackList, whiteList);
+    public Node(State state) {
+
+        this.state = state;
+        child = new ArrayList();
 
     }
 
-    public void addMove(Space move) {
+    public void setMove(Space move) {
 
         this.move = move;
+
+    }
+
+    public void setHeuristic(int h) {
+
+        this.heuristic = h;
+
+    }
+
+    public Space getPriorMove() {
+
+        return move;
+    }
+
+    public State getState() {
+
+        return state;
+    }
+
+    public ArrayList getChildren() {
+
+        return child;
+    }
+
+    public int getHeuristic() {
+
+        return heuristic;
+    }
+
+    public void LinkTo(Node node) {
+
+        child.Add(node);
 
     }
 
@@ -63,25 +97,23 @@ class Node {
 
 class Tree {
     
-    public ArrayList nodes;
+    public Node root;
 
     public Tree(Node current, int depth) {
 
-        nodes = new ArrayList();
-        buildTree(current, depth - 1);
+        root = current;
+        buildTree(root, depth - 1);
 
     }
 
-    void buildTree(Node current, int depth) {
-
-            nodes.Add(current);
+    void buildTree(Node node, int depth) {
 
             if(depth != 0)
-                foreach(Space move in current.state.getMoves()) {
-                    State s = current.state.calculateNextState(move.x, move.y, new ArrayList());
-                    Node next = new Node(s.isBlackTurn(), s.getBlackList(), s.getWhiteList());
-                    next.addMove(move);
-                    current.link.Add(next);
+                foreach(Space move in node.getState().getMoves()) {
+                    State s = node.getState().calculateNextState(move.x, move.y, new ArrayList());
+                    Node next = new Node(s);
+                    next.setMove(move);
+                    node.LinkTo(next);
                     buildTree(next, depth - 1);
                 }
 
@@ -89,95 +121,53 @@ class Tree {
 
     public Space miniMaxSearch() {
 
-        Node cur = (Node)nodes[0];
-        Node maximum = max(cur.link);
+        Node choice = minMax(root.getChildren(), 1);
 
-        return maximum.move;
-
+        return choice.getPriorMove();
     }
 
-    Node max(ArrayList nodes) {
+    Node minMax(ArrayList children, int player) {
 
-        int score = 0;
-        int maxScore = -10000;
-        Node maximum = null;
+        int bestH;
+        Node choice = null;
 
-        foreach(Node n in nodes) {
-            if(n.link.Count == 0) {
+        if(player == 1)
+            bestH = int.MinValue;
+        else
+            bestH = int.MaxValue;
+
+        foreach(Node child in children) {
+            if(child.getChildren().Count == 0) {
+                int black = child.getState().getBlackList().Count;
+                int white = child.getState().getWhiteList().Count;
+
                 switch(!Settings.playerIsBlack) {
                 case true:
-                    score = n.state.getBlackList().Count - n.state.getWhiteList().Count;
+                    if(player == 1)
+                        child.setHeuristic(black - white);
+                    else
+                        child.setHeuristic(white - black);
                     break;
                 case false:
-                    score = n.state.getWhiteList().Count - n.state.getBlackList().Count;
+                    if(player == 1)
+                        child.setHeuristic(white - black);
+                    else
+                        child.setHeuristic(black - white);
                     break;
-                }
-                if(score > maxScore) {
-                    maxScore = score;
-                    maximum = n;
                 }
             }
             else {
-                Node minimum = min(n.link);
-                switch(!Settings.playerIsBlack) {
-                case true:
-                    score = minimum.state.getBlackList().Count - minimum.state.getWhiteList().Count;
-                    break;
-                case false:
-                    score = minimum.state.getWhiteList().Count - minimum.state.getBlackList().Count;
-                    break;
-                }
-                if(score > maxScore) {
-                    maxScore = score;
-                    maximum = minimum;
-                }
+                Node childChoice = minMax(child.getChildren(), -player);
+                child.setHeuristic(childChoice.getHeuristic());
+            }
+
+            if((player == 1 && child.getHeuristic() > bestH) || (player == -1 && child.getHeuristic() < bestH)) {
+                bestH = child.getHeuristic();
+                choice = child;
             }
         }
 
-        return maximum;
-
-    }
-
-    Node min(ArrayList nodes) {
-
-        int score = 0;
-        int minScore = -10000;
-        Node minimum = null;
-
-        foreach(Node n in nodes) {
-            if(n.link.Count == 0) {
-                switch(!Settings.playerIsBlack) {
-                case true:
-                    score = n.state.getBlackList().Count - n.state.getWhiteList().Count;
-                    break;
-                case false:
-                    score = n.state.getWhiteList().Count - n.state.getBlackList().Count;
-                    break;
-                }
-                if(score > minScore) {
-                    minScore = score;
-                    minimum = n;
-                }
-            }
-            else {
-                Node maximum = max(n.link);
-                switch(!Settings.playerIsBlack) {
-                case true:
-                    score = maximum.state.getBlackList().Count - maximum.state.getWhiteList().Count;
-                    break;
-                case false:
-                    score = maximum.state.getWhiteList().Count - maximum.state.getBlackList().Count;
-                    break;
-                }
-                if(score < minScore) {
-                    minScore = score;
-                    minimum = maximum;
-                }
-            }
-        }
-
-        return minimum;
-
+        return choice;
     }
 
 }
