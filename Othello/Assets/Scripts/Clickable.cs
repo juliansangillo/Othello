@@ -62,13 +62,12 @@ public class Clickable : MonoBehaviour {
         if(gameObject.GetComponent<Clickable>().enabled) {
             Space selected;
             
-            char i = name[name.Length - 2];
-            char j = name[name.Length - 1];
+            char x = name[name.Length - 1];
+            char y = name[name.Length - 2];
 
-            selected.x = (int)Char.GetNumericValue(j);
-            selected.y = (int)Char.GetNumericValue(i);
+            selected.x = (int)Char.GetNumericValue(x);
+            selected.y = (int)Char.GetNumericValue(y);
 
-            SendMessageUpwards("playerMoves", selected);
             SendMessageUpwards("addToBoard", selected);
         }
 

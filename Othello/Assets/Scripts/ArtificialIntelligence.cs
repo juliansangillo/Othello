@@ -2,37 +2,25 @@
 using UnityEngine;
 
 public class ArtificialIntelligence : MonoBehaviour {
-    
-    Tree tree;
-    State current;
 
-    void Start() {
-        
-        bool isBlack = true;
-        ArrayList blackList = new ArrayList();
-        ArrayList whiteList = new ArrayList();
+    private Tree tree;
+    private int depth = 3;
+    private State current;
 
-        blackList.Add(new Space(3, 3));
-        blackList.Add(new Space(4, 4));
-        whiteList.Add(new Space(3, 4));
-        whiteList.Add(new Space(4, 3));
+    void initiateAiTurn() {
 
-        current = new State(isBlack, blackList, whiteList);
+        Space choice = new Space();
 
-    }
-
-    void playerMoves(Space selected) {
-
-        current = current.calculateNextState(selected.x, selected.y, new ArrayList());
-
-    }
-
-    void aiMoves() {
+        current = gameObject.GetComponent<FlowController>().gameState;
 
         Node root = new Node(current);
-        tree = new Tree(root, 3);
+        tree = new Tree(root, depth);
         
-        Space choice = tree.miniMaxSearch();
+        tree.root.setHeuristic(tree.miniMax(tree.root.getChildren(), 1));
+
+        foreach(Node child in tree.root.getChildren())
+            if(child.getHeuristic() == tree.root.getHeuristic())
+                choice = child.getPriorMove();
 
         BroadcastMessage("addToBoard", choice);
 
@@ -50,7 +38,10 @@ class Node {
 
     public Node(State state) {
 
-        this.state = state;
+        State.Color[ , ] board = state.getBoard();
+        bool isBlack = state.isBlackTurn();
+        this.state = new State(board, isBlack);
+
         child = new ArrayList();
 
     }
@@ -99,10 +90,10 @@ class Tree {
     
     public Node root;
 
-    public Tree(Node current, int depth) {
+    public Tree(Node node, int depth) {
 
-        root = current;
-        buildTree(root, depth - 1);
+        root = node;
+        buildTree(root, depth);
 
     }
 
@@ -110,7 +101,7 @@ class Tree {
 
             if(depth != 0)
                 foreach(Space move in node.getState().getMoves()) {
-                    State s = node.getState().calculateNextState(move.x, move.y, new ArrayList());
+                    State s = node.getState().calculateNextState(move, new ArrayList());
                     Node next = new Node(s);
                     next.setMove(move);
                     node.LinkTo(next);
@@ -119,17 +110,9 @@ class Tree {
 
     }
 
-    public Space miniMaxSearch() {
-
-        Node choice = minMax(root.getChildren(), 1);
-
-        return choice.getPriorMove();
-    }
-
-    Node minMax(ArrayList children, int player) {
+    public int miniMax(ArrayList children, int player) {
 
         int bestH;
-        Node choice = null;
 
         if(player == 1)
             bestH = int.MinValue;
@@ -138,8 +121,8 @@ class Tree {
 
         foreach(Node child in children) {
             if(child.getChildren().Count == 0) {
-                int black = child.getState().getBlackList().Count;
-                int white = child.getState().getWhiteList().Count;
+                int black = child.getState().getCount(State.Color.BLACK);
+                int white = child.getState().getCount(State.Color.WHITE);
 
                 switch(!Settings.playerIsBlack) {
                 case true:
@@ -156,18 +139,14 @@ class Tree {
                     break;
                 }
             }
-            else {
-                Node childChoice = minMax(child.getChildren(), -player);
-                child.setHeuristic(childChoice.getHeuristic());
-            }
+            else
+                child.setHeuristic(miniMax(child.getChildren(), -player));
 
-            if((player == 1 && child.getHeuristic() > bestH) || (player == -1 && child.getHeuristic() < bestH)) {
+            if((player == 1 && child.getHeuristic() > bestH) || (player == -1 && child.getHeuristic() < bestH))
                 bestH = child.getHeuristic();
-                choice = child;
-            }
         }
 
-        return choice;
+        return bestH;
     }
 
 }
