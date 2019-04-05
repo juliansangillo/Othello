@@ -15,80 +15,85 @@ public struct Space {
 
 public class State {
 
+    public enum Color { EMPTY, BLACK, WHITE }
+
+    private Color[ , ] board;
     private bool isBlack;
-    private ArrayList blackList;
-    private ArrayList whiteList;
     private ArrayList moves = new ArrayList();
 
-    public State(bool isBlack, ArrayList blackList, ArrayList whiteList) {
+    public State(Color[ , ] board, bool isBlack) {
 
         this.isBlack = isBlack;
-        this.blackList = blackList;
-        this.whiteList = whiteList;
+        this.board = board;
         calculateMoves();
 
     }
 
-    public State calculateNextState(int x, int y, ArrayList piecesToFlip) {
+    public State calculateNextState(Space selected, ArrayList piecesToFlip) {
 
-        Space space = new Space(x, y);
-
+        Color [ , ] board = new Color[8 , 8];
         bool isBlack = this.isBlack;
-        ArrayList blackList = new ArrayList(this.blackList);
-        ArrayList whiteList = new ArrayList(this.whiteList);
-
+		
+		for(int y = 0; y < 8; y++)
+			for(int x = 0; x < 8; x++)
+				board[x , y] = this.board[x , y];
+        
         switch(isBlack) {
         case true:
-            blackList.Add(space);
-            for(int i = -1; i <= 1; i++)
-                for(int j = -1; j <= 1; j++) {
-                    Space pos;
-                    pos.x = space.x;
-                    pos.y = space.y;
+            board[selected.x , selected.y] = Color.BLACK;
+            for(int y = -1; y <= 1; y++)
+                for(int x = -1; x <= 1; x++) {
+                    Space pos = new Space(selected.x, selected.y);
+                    bool outOfBounds = false;
                     
                     ArrayList white = new ArrayList();
                     do {
-                        pos.x += j;
-                        pos.y += i;
-                        if(whiteList.Contains(pos))
-                            white.Add(whiteList[whiteList.IndexOf(pos)]);
-                    } while(whiteList.Contains(pos));
+                        pos.x += x;
+                        pos.y += y;
+                        if(pos.x < 0 || pos.x >= 8 || pos.y < 0 || pos.y >= 8) {
+                            outOfBounds = true;
+                            break;
+                        }
+                        else if(board[pos.x , pos.y] == Color.WHITE)
+                            white.Add(new Space(pos.x, pos.y));
+                    } while(board[pos.x , pos.y] == Color.WHITE);
 
-                    if(blackList.Contains(pos))
+                    if(!outOfBounds && board[pos.x , pos.y] == Color.BLACK)
                         foreach(Space sp in white) {
-                            whiteList.Remove(sp);
-                            blackList.Add(sp);
+                            board[sp.x, sp.y] = Color.BLACK;
                             piecesToFlip.Add(sp);
                         }
                 }
             break;
         case false:
-            whiteList.Add(space);
-            for(int i = -1; i <= 1; i++)
-                for(int j = -1; j <= 1; j++) {
-                    Space pos;
-                    pos.x = space.x;
-                    pos.y = space.y;
+            board[selected.x , selected.y] = Color.WHITE;
+            for(int y = -1; y <= 1; y++)
+                for(int x = -1; x <= 1; x++) {
+                    Space pos = new Space(selected.x, selected.y);
+                    bool outOfBounds = false;
 
                     ArrayList black = new ArrayList();
                     do {
-                        pos.x += j;
-                        pos.y += i;
-                        if(blackList.Contains(pos))
-                            black.Add(blackList[blackList.IndexOf(pos)]);
-                    } while(blackList.Contains(pos));
+                        pos.x += x;
+                        pos.y += y;
+                        if(pos.x < 0 || pos.x >= 8 || pos.y < 0 || pos.y >= 8) {
+                            outOfBounds = true;
+                            break;
+                        }
+                        else if(board[pos.x , pos.y] == Color.BLACK)
+                            black.Add(new Space(pos.x, pos.y));
+                    } while(board[pos.x , pos.y] == Color.BLACK);
 
-                    if(whiteList.Contains(pos))
+                    if(!outOfBounds && board[pos.x , pos.y] == Color.WHITE)
                         foreach(Space sp in black) {
-                            blackList.Remove(sp);
-                            whiteList.Add(sp);
+                            board[sp.x , sp.y] = Color.WHITE;
                             piecesToFlip.Add(sp);
                         }
                 }
             break;
         }
 
-        State newState = new State(!isBlack, blackList, whiteList);
+        State newState = new State(board, !isBlack);
 
         return newState;
 
@@ -98,43 +103,53 @@ public class State {
 
         switch(isBlack) {
         case true:
-            foreach(Space black in blackList)
-                for(int i = -1; i <= 1; i++)
-                    for(int j = -1; j <= 1; j++) {
-                        Space pos = black;
-                        int whiteCount = 0;
+            ArrayList black = getColor(Color.BLACK);
+            foreach(Space b in black) {
+                for(int y = -1; y <= 1; y++)
+                    for(int x = -1; x <= 1; x++) {
+                        Space pos = new Space(b.x, b.y);
+						int count = -1;
+                        bool outOfBounds = false;
                         do {
-                            pos.x += i;
-                            pos.y += j;
-                            if(whiteList.Contains(pos))
-                                whiteCount++;
-                        } while(whiteList.Contains(pos));
+                            pos.x += x;
+                            pos.y += y;
+							count++;
+                            if(pos.x < 0 || pos.x >= 8 || pos.y < 0 || pos.y >= 8) {
+                                outOfBounds = true;
+                                break;
+                            }
+                        } while(board[pos.x , pos.y] == Color.WHITE);
 
-                        if(pos.x >= 0 && pos.x < 8 && pos.y >= 0 && pos.y < 8 && whiteCount > 0 && 
-                        !blackList.Contains(pos) && !moves.Contains(pos))
+                        if(!outOfBounds && count > 0 && board[pos.x , pos.y] == Color.EMPTY)
                             moves.Add(pos);
                     }
+            }
             break;
         case false:
-            foreach(Space white in whiteList)
-                for(int i = -1; i <= 1; i++)
-                    for(int j = -1; j <= 1; j++) {
-                        Space pos = white;
-                        int blackCount = 0;
+            ArrayList white = getColor(Color.WHITE);
+            foreach(Space w in white) {
+                for(int y = -1; y <= 1; y++)
+                    for(int x = -1; x <= 1; x++) {
+                        Space pos = new Space(w.x, w.y);
+						int count = -1;
+                        bool outOfBounds = false;
                         do {
-                            pos.x += i;
-                            pos.y += j;
-                            if(blackList.Contains(pos))
-                                blackCount++;
-                        } while(blackList.Contains(pos));
+                            pos.x += x;
+                            pos.y += y;
+							count++;
+                            if(pos.x < 0 || pos.x >= 8 || pos.y < 0 || pos.y >= 8) {
+                                outOfBounds = true;
+                                break;
+                            }
+                        } while(board[pos.x , pos.y] == Color.BLACK);
 
-                        if(pos.x >= 0 && pos.x < 8 && pos.y >= 0 && pos.y < 8 && blackCount > 0 && 
-                        !whiteList.Contains(pos) && !moves.Contains(pos))
+                        if(!outOfBounds && count > 0 && board[pos.x , pos.y] == Color.EMPTY)
                             moves.Add(pos);
                     }
+            }
             break;
         }
-
+        
     }
 
     public void changeTurn() {
@@ -143,24 +158,45 @@ public class State {
 
     }
 
+    public int getCount(Color col) {
+
+        int count = 0;
+
+        for(int y = 0; y < 8; y++)
+            for(int x = 0; x < 8; x++)
+                if(board[x , y] == col)
+                    count++;
+
+        return count;
+    }
+
+    public Color[ , ] getBoard() {
+
+
+        return board;
+    }
+
     public bool isBlackTurn() {
 
         return isBlack;
     }
 
-    public ArrayList getBlackList() {
-
-        return blackList;
-    }
-
-    public ArrayList getWhiteList() {
-
-        return whiteList;
-    }
-
     public ArrayList getMoves() {
 
         return moves;
+    }
+
+    private ArrayList getColor(Color col) {
+
+        ArrayList pieces = new ArrayList();
+
+        for(int y = 0; y < 8; y++)
+            for(int x = 0; x < 8; x++) {
+                if(board[x , y] == col)
+                    pieces.Add(new Space(x, y));
+            }
+
+        return pieces;
     }
 
 }

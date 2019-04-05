@@ -18,54 +18,57 @@ public class FlowController : MonoBehaviour {
     public GameObject whiteWin;
     public GameObject draw;
 
+    public State gameState;
+
     private GameObject[ , ] space;
     private GameObject[ , ] pieces;
-    private State gameState;
 
     private bool gameOver = false;
     
-    void Start() {
+    void Awake() {
 
         space = new GameObject[8 , 8];
         pieces = new GameObject[8 , 8];
 
-        Transform b = board.transform;
-        for(int i = 0; i < 8; i++) {
-            Transform row = b.GetChild(i);
-            for(int j = 0; j < 8; j++)
-                space[i , j] = row.GetChild(j).gameObject;
+        for(int y = 0; y < 8; y++) {
+            Transform row = board.transform.GetChild(y);
+            for(int x = 0; x < 8; x++)
+                space[x , y] = row.GetChild(x).gameObject;
         }
 
-        ArrayList blackList = new ArrayList();
-        ArrayList whiteList = new ArrayList();
+        State.Color[ , ] gameBoard = new State.Color[8 , 8];
 
-        blackList.Add(new Space(3, 3));
-        blackList.Add(new Space(4, 4));
-        whiteList.Add(new Space(3, 4));
-        whiteList.Add(new Space(4, 3));
+        for(int y = 0; y < 8; y++)
+            for(int x = 0; x < 8; x++)
+                if((x == 3 && y == 3) || (x == 4 && y == 4))
+                    gameBoard[x , y] = State.Color.BLACK;
+                else if((x == 3 && y == 4) || (x == 4 && y == 3))
+                    gameBoard[x , y] = State.Color.WHITE;
+                else
+                    gameBoard[x , y] = State.Color.EMPTY;
 
-        pieces = new GameObject[8 , 8];
         pieces[3 , 3] = GameObject.Find("Black");
         pieces[4 , 4] = GameObject.Find("Black (1)");
         pieces[3 , 4] = GameObject.Find("White");
         pieces[4 , 3] = GameObject.Find("White (1)");
 
-        gameState = new State(true, blackList, whiteList);
+        gameState = new State(gameBoard, true);
 
-        enableOptions();
+        enterNextTurn();
         
     }
 
-    void enableOptions() {
+    void enterNextTurn() {
 
         if(Settings.playerIsBlack == gameState.isBlackTurn()) {
             ArrayList moves = gameState.getMoves();
             foreach(Space move in moves) {
-                space[move.y, move.x].GetComponent<Clickable>().enabled = true;
+                space[move.x, move.y].GetComponent<Clickable>().enabled = true;
             }
         }
-        else
-            BroadcastMessage("aiMoves");
+        else {
+            BroadcastMessage("initiateAiTurn");
+        }
 
     }
 
@@ -77,7 +80,7 @@ public class FlowController : MonoBehaviour {
         Vector3 target;
         bool isBlack;
 
-        target = space[selected.y , selected.x].GetComponent<Transform>().position;
+        target = space[selected.x , selected.y].GetComponent<Transform>().position;
         target.y = 0.5f;
 
         isBlack = gameState.isBlackTurn();
@@ -108,17 +111,15 @@ public class FlowController : MonoBehaviour {
         }
 
         setState(selected);
-        if(!gameOver)
-            enableOptions();
 
     }
 
     void setState(Space selected) {
 
         ArrayList piecesToFlip = new ArrayList();
-        int blackCount = gameState.getBlackList().Count;
-        int whiteCount = gameState.getWhiteList().Count;
-        gameState = gameState.calculateNextState(selected.x, selected.y, piecesToFlip);
+        int blackCount = gameState.getCount(State.Color.BLACK);
+        int whiteCount = gameState.getCount(State.Color.WHITE);
+        gameState = gameState.calculateNextState(selected, piecesToFlip);
         switch(!gameState.isBlackTurn()) {
         case true:
             blackCount++;
@@ -129,31 +130,6 @@ public class FlowController : MonoBehaviour {
             StartCoroutine(flip(piecesToFlip, blackCount, whiteCount, "White"));
             break;
         }
-
-        int count = 2;
-        do {
-            if(gameState.getMoves().Count == 0) {
-                gameState.changeTurn();
-                gameState.calculateMoves();
-                count--;
-            }
-            else
-                break;
-        } while(count != 0);
-
-        if(count == 1)
-            switch(!gameState.isBlackTurn()) {
-            case true:
-                outOfMoves(1);
-                break;
-            case false:
-                outOfMoves(2);
-                break;
-            }
-        else if(count == 0)
-            endGame();
-        else
-            disableAlerts();
 
     }
 
@@ -179,6 +155,7 @@ public class FlowController : MonoBehaviour {
             yield return new WaitForSeconds(0.2f);
         }
 
+        //Continue after piece flipping-------------------------------------------------
         Animator indicate = turnIndicator.transform.GetChild(0).GetComponent<Animator>();
         switch(gameState.isBlackTurn()) {
         case true:
@@ -189,15 +166,43 @@ public class FlowController : MonoBehaviour {
             break;
         }
 
+        int count = 2;
+        do {
+            if(gameState.getMoves().Count == 0) {
+                gameState.changeTurn();
+                gameState.calculateMoves();
+                count--;
+            }
+            else
+                break;
+        } while(count != 0);
+
+        if(count == 0)
+            endGame();
+        else if(count == 1)
+            switch(!gameState.isBlackTurn()) {
+            case true:
+                outOfMoves('B');
+                break;
+            case false:
+                outOfMoves('W');
+                break;
+            }
+        else
+            disableAlerts();
+
+        if(!gameOver)
+            enterNextTurn();
+
     }
 
-    void outOfMoves(int piece) {
+    void outOfMoves(char piece) {
 
         switch(piece) {
-        case 1:
+        case 'B':
             blackAlert.SetActive(true);
             break;
-        case 2:
+        case 'W':
             whiteAlert.SetActive(true);
             break;
         }
@@ -213,8 +218,10 @@ public class FlowController : MonoBehaviour {
 
     void endGame() {
 
-        int blackScore = gameState.getBlackList().Count;
-        int whiteScore = gameState.getWhiteList().Count;
+        disableAlerts();
+
+        int blackScore = gameState.getCount(State.Color.BLACK);
+        int whiteScore = gameState.getCount(State.Color.WHITE);
 
         if(blackScore > whiteScore)
             blackWin.SetActive(true);
